@@ -18,7 +18,10 @@ def create_app(config_name='development'):
     
     # Register Blueprints
     from app.routes.students import students_bp
+    from app.routes.allocations import allocations_bp
+    
     app.register_blueprint(students_bp, url_prefix='/api/students')
+    app.register_blueprint(allocations_bp, url_prefix='/api/allocations')
     
     # Health check endpoint
     @app.route('/health', methods=['GET'])
