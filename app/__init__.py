@@ -23,6 +23,7 @@ def create_app(config_name='development'):
     from app.routes.visitors import visitors_bp
     from app.routes.complaints import complaints_bp
     from app.routes.maintenance import maintenance_bp
+    from app.routes.reports import reports_bp
     
     app.register_blueprint(students_bp, url_prefix='/api/students')
     app.register_blueprint(allocations_bp, url_prefix='/api/allocations')
@@ -30,6 +31,7 @@ def create_app(config_name='development'):
     app.register_blueprint(visitors_bp, url_prefix='/api/visitors')
     app.register_blueprint(complaints_bp, url_prefix='/api/complaints')
     app.register_blueprint(maintenance_bp, url_prefix='/api/maintenance')
+    app.register_blueprint(reports_bp, url_prefix='/api/reports')
     
     # Health check endpoint
     @app.route('/health', methods=['GET'])
