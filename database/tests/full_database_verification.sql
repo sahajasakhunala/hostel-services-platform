@@ -21,9 +21,13 @@ SOURCE database/tests/trigger_tests.sql;
 SELECT '--- 3. RUNNING STORED PROCEDURE VERIFICATION TESTS ---' AS TEST_SUITE;
 SOURCE database/tests/procedure_tests.sql;
 
--- 4. Analytical Views & Operational Reporting Verification
+-- 4. Operational Views Verification
 SELECT '--- 4. RUNNING OPERATIONAL VIEW VERIFICATION TESTS ---' AS TEST_SUITE;
 SOURCE database/tests/view_tests.sql;
+
+-- 5. Analytical Reports & BI Verification
+SELECT '--- 5. RUNNING ANALYTICAL REPORT VERIFICATION TESTS ---' AS TEST_SUITE;
+SOURCE database/tests/report_tests.sql;
 
 SELECT '========================================================================' AS STATUS;
 SELECT 'HOSTELFLOW DATABASE VERIFICATION COMPLETED SUCCESSFULLY' AS STATUS;
