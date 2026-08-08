@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Complaints - HostelFlow Administration{% endblock %}
+{% block page_title %}Student Grievance & Complaints{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Student Complaints Log</h2>
+    <button class="btn btn-primary" onclick="openComplaintModal()">+ File Complaint</button>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Student</th>
+          <th>Category</th>
+          <th>Subject</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Filed At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="complaints-table-body">
+        <tr>
+          <td colspan="8" class="loading-state">Loading complaints...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- File Complaint Modal -->
+<div class="modal-overlay" id="complaint-modal">
+  <div class="modal-card">
+    <h3 style="margin-bottom: var(--space-4);">File Student Grievance Complaint</h3>
+    <form id="complaint-form">
+      <div class="form-group">
+        <label class="form-label">Student ID</label>
+        <input type="number" id="cmp_student_id" class="form-control" placeholder="e.g. 1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category ID</label>
+        <input type="number" id="cmp_category_id" class="form-control" placeholder="e.g. 1 (Electrical)" value="1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input type="text" id="cmp_subject" class="form-control" placeholder="Brief subject" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="cmp_description" class="form-control" rows="3" placeholder="Detailed grievance description" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select id="cmp_priority" class="form-control" required>
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-4);">
+        <button type="button" class="btn btn-secondary" onclick="closeComplaintModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">File Complaint</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/complaints.js') }}"></script>
+{% endblock %}
