@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - HostelFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+    }
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      box-shadow: var(--shadow-lg);
+    }
+    .login-brand {
+      text-align: center;
+      margin-bottom: var(--space-6);
+    }
+    .login-brand h2 {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--text-primary);
+    }
+    .login-brand p {
+      font-size: var(--font-size-xs);
+      color: var(--text-muted);
+      margin-top: var(--space-1);
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="login-brand">
+    <h2>HostelFlow</h2>
+    <p>Management Platform Authentication</p>
+  </div>
+
+  <form id="login-form">
+    <div class="form-group">
+      <label class="form-label" for="username">Username</label>
+      <input type="text" id="username" class="form-control" placeholder="Enter username" required autocomplete="username">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">Password</label>
+      <input type="password" id="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: var(--space-4); padding: 12px;">Sign In</button>
+  </form>
+</div>
+
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>
+<script>
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      const res = await ApiClient.post('/api/auth/login', { username, password });
+      ApiClient.showToast('Login successful. Redirecting...', 'success');
+      setTimeout(() => { window.location.href = '/dashboard'; }, 800);
+    } catch (err) {
+      ApiClient.showToast(err.message || 'Authentication failed.', 'error');
+    }
+  });
+</script>
+</body>
+</html>
