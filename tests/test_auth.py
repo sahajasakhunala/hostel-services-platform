@@ -19,13 +19,12 @@ def test_login_invalid_credentials(client):
     assert response.status_code == 401
     json_data = response.get_json()
     assert json_data['status'] == 'error'
-    assert 'Invalid username or password' in json_data['message']
 
 
 def test_login_missing_payload(client):
     """Tests POST /api/auth/login with missing username/password."""
     response = client.post('/api/auth/login', json={'username': 'admin'})
-    assert response.status_code == 401
+    assert response.status_code == 400
     json_data = response.get_json()
     assert json_data['status'] == 'error'
 

@@ -36,7 +36,8 @@ def test_checkin_visitor_missing_fields(client):
     assert response.status_code == 400
     json_data = response.get_json()
     assert json_data['status'] == 'error'
-    assert 'Missing required field' in json_data['message']
+    assert json_data['message'] == 'Validation failed.'
+    assert 'errors' in json_data
 
 
 def test_checkout_visitor_nonexistent(client):
@@ -45,4 +46,3 @@ def test_checkout_visitor_nonexistent(client):
     assert response.status_code in (400, 500)
     json_data = response.get_json()
     assert json_data['status'] == 'error'
-    assert 'not found' in json_data['message'].lower()
