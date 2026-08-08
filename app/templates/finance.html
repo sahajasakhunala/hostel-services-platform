@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Finance - HostelFlow Administration{% endblock %}
+{% block page_title %}Finance & Fee Collection Management{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Outstanding Fee Dues Report</h2>
+    <button class="btn btn-primary" onclick="openPaymentModal()">+ Process Payment</button>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Invoice ID</th>
+          <th>Student Name</th>
+          <th>Reg Number</th>
+          <th>Room Type</th>
+          <th>Total Amount</th>
+          <th>Paid Amount</th>
+          <th>Outstanding Dues</th>
+          <th>Due Date</th>
+          <th>Overdue Days</th>
+        </tr>
+      </thead>
+      <tbody id="finance-table-body">
+        <tr>
+          <td colspan="9" class="loading-state">Loading outstanding fee dues...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Process Payment Modal -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal-card">
+    <h3 style="margin-bottom: var(--space-4);">Process Fee Payment</h3>
+    <form id="payment-form">
+      <div class="form-group">
+        <label class="form-label">Invoice ID</label>
+        <input type="number" id="pay_invoice_id" class="form-control" placeholder="e.g. 1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Payment Amount (₹)</label>
+        <input type="number" step="0.01" id="pay_amount" class="form-control" placeholder="e.g. 5000.00" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select id="pay_method" class="form-control" required>
+          <option value="UPI">UPI / Online Transfer</option>
+          <option value="NetBanking">Net Banking</option>
+          <option value="CreditCard">Credit / Debit Card</option>
+          <option value="Cash">Cash</option>
+          <option value="BankDraft">Demand Draft</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Receipt / Transaction Reference Number</label>
+        <input type="text" id="pay_receipt_no" class="form-control" placeholder="e.g. TXN-2026-9901" required>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-4);">
+        <button type="button" class="btn btn-secondary" onclick="closePaymentModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Process Payment</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/finance.js') }}"></script>
+{% endblock %}
