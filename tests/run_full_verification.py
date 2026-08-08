@@ -1,8 +1,7 @@
-"""
-HostelFlow Master Application Layer Verification Runner
-"""
 import sys
-import unittest
+import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+
 from app import create_app
 
 
