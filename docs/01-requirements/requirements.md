@@ -1,4 +1,4 @@
-# HostelOS — Requirements Specification
+# HostelFlow — Requirements Specification
 
 **Document ID**: HOSTEL-REQ-001  
 **Version**: 1.0  
@@ -20,7 +20,7 @@ University hostels manage a complex web of physical assets (buildings, blocks, f
 | No historical records | Transfer history lost; allocation patterns invisible |
 | No access control | Unauthorized changes to allocation, fees, or records |
 
-**HostelOS addresses this** by providing a centralized, database-backed platform where every operation is recorded, validated, constrained, and auditable — with the database itself enforcing critical integrity rules independently of the application layer.
+**HostelFlow addresses this** by providing a centralized, database-backed platform where every operation is recorded, validated, constrained, and auditable — with the database itself enforcing critical integrity rules independently of the application layer.
 
 ---
 
@@ -28,7 +28,7 @@ University hostels manage a complex web of physical assets (buildings, blocks, f
 
 ### 2.1 In Scope
 
-HostelOS manages hostel accommodation and student services for **a single university campus containing multiple hostel buildings**.
+HostelFlow manages hostel accommodation and student services for **a single university campus containing multiple hostel buildings**.
 
 | Domain | What's Covered |
 |---|---|
@@ -332,7 +332,7 @@ A registered student with an active or past hostel allocation.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        HostelOS                              │
+│                        HostelFlow                              │
 │                                                              │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐    │
 │  │   Student    │  │  Allocation  │  │    Financial     │    │
@@ -362,7 +362,7 @@ A registered student with an active or past hostel allocation.
     └─────────────┘                    └─────────────────┘
 ```
 
-HostelOS is a **self-contained** system. Students are registered manually — the system does not integrate with any external admission, academic, or financial system.
+HostelFlow is a **self-contained** system. Students are registered manually — the system does not integrate with any external admission, academic, or financial system.
 
 ---
 
@@ -370,7 +370,7 @@ HostelOS is a **self-contained** system. Students are registered manually — th
 
 | # | Assumption |
 |---|---|
-| A1 | The university has already admitted the student before they are registered in HostelOS |
+| A1 | The university has already admitted the student before they are registered in HostelFlow |
 | A2 | Each hostel building has a clearly defined block/floor/room structure |
 | A3 | Room capacity is fixed and determined by the physical infrastructure |
 | A4 | Fee structures are defined per room type per academic year and do not change mid-year |
@@ -395,7 +395,7 @@ Precise definitions to avoid ambiguity during design and development:
 | **Room** | A physical space on a floor that contains one or more beds. Has a defined type and capacity |
 | **Room Type** | A classification of rooms by size/configuration: Single (1 bed), Double (2 beds), Triple (3 beds), Dormitory (4+ beds) |
 | **Bed** | The atomic allocatable unit. A single sleeping position within a room. One bed can be occupied by at most one student at a time |
-| **Student** | A person admitted to the university and registered in HostelOS for hostel accommodation. Has a unique registration number |
+| **Student** | A person admitted to the university and registered in HostelFlow for hostel accommodation. Has a unique registration number |
 | **Guardian** | A parent or emergency contact associated with a student |
 | **Department** | An academic department (e.g., Computer Science, Electronics). Stored as reference data |
 | **Course** | An academic program (e.g., B.Tech CSE, MBA, M.Sc Physics). NOT individual subjects |
@@ -412,7 +412,7 @@ Precise definitions to avoid ambiguity during design and development:
 | **Complaint** | A formal grievance filed by a student regarding hostel conditions |
 | **Complaint Category** | A predefined classification for complaints (e.g., Noise, Hygiene, Infrastructure) |
 | **Maintenance Request** | A formal request for repair or upkeep of hostel infrastructure or equipment |
-| **User** | A person with login credentials in HostelOS. May be a student, warden, security guard, maintenance worker, or administrator |
+| **User** | A person with login credentials in HostelFlow. May be a student, warden, security guard, maintenance worker, or administrator |
 | **Role** | A named set of permissions (Admin, Warden, Security, Maintenance, Student) |
 | **Audit Log** | A record of a critical system action: who performed it, what changed, when, and what the old/new values were |
 | **Capacity** | The maximum number of beds a room can physically hold. The number of beds in a room must never exceed this value |
@@ -426,7 +426,7 @@ This section maps our requirements to the college's specific deliverables to ens
 
 ### Review 1 Deliverables
 
-| College Requirement | HostelOS Coverage |
+| College Requirement | HostelFlow Coverage |
 |---|---|
 | Problem identification, scope, objectives | Sections 1, 2, 3 of this document |
 | Users and functional requirements | Sections 5, 6 of this document |
@@ -435,7 +435,7 @@ This section maps our requirements to the college's specific deliverables to ens
 
 ### Review 2 Deliverables
 
-| College Requirement | HostelOS Coverage |
+| College Requirement | HostelFlow Coverage |
 |---|---|
 | Normalized database design up to 3NF | Phase 3: `docs/06-normalization/`, `docs/07-functional-dependencies/` |
 | Data dictionary | Phase 3: `docs/08-data-dictionary/` |
@@ -446,7 +446,7 @@ This section maps our requirements to the college's specific deliverables to ens
 
 ### Review 3 Deliverables
 
-| College Requirement | HostelOS Coverage |
+| College Requirement | HostelFlow Coverage |
 |---|---|
 | Application connected to database | Phase 6–7: Flask application |
 | Student registration, bed allocation, transfer | Modules SM, BA, TR |

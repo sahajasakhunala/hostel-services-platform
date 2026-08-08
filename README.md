@@ -1,4 +1,4 @@
-# HostelOS 🏨
+# HostelFlow 🏨
 
 [![Database](https://img.shields.io/badge/Database-MySQL%209.7.1-blue?logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Backend](https://img.shields.io/badge/Backend-Python%203.10%20%7C%20Flask-green?logo=python&logoColor=white)](https://www.python.org/)
@@ -6,7 +6,7 @@
 [![VCS](https://img.shields.io/badge/VCS-Git%202.53-lightgrey?logo=git&logoColor=white)](https://git-scm.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **HostelOS** is a production-inspired, highly-normalized relational database management system (RDBMS) and transactional service layer for hostel accommodation and student service lifecycle orchestration. 
+> **HostelFlow** is a production-inspired, highly-normalized relational database management system (RDBMS) and transactional service layer for hostel accommodation and student service lifecycle orchestration. 
 
 Specifically architected around **MySQL 9.7.1**, this system eliminates typical application-level data corruption risks by using the database engine as the ultimate authority on referential integrity and state transitions.
 
@@ -42,14 +42,14 @@ The project implements a layered service-oriented architecture designed to handl
 ## 🔬 Core Engineering Innovations
 
 ### 1. State-Derived Structural Invariants (Generated Columns)
-To enforce that a student can have at most one active bed allocation, and a bed can host at most one active student, HostelOS bypasses manual state synchronization. It uses MySQL virtual/stored generated columns that compute active keys dynamically from the allocation status:
+To enforce that a student can have at most one active bed allocation, and a bed can host at most one active student, HostelFlow bypasses manual state synchronization. It uses MySQL virtual/stored generated columns that compute active keys dynamically from the allocation status:
 * `active_bed_key = IF(status = 'active', bed_id, NULL)`
 * `active_student_key = IF(status = 'active', student_id, NULL)`
 
 Applying a `UNIQUE` index on these generated columns forces the database engine to guarantee one-active-resident-per-bed and one-active-allocation-per-student structurally, even if the application layer is bypassed entirely.
 
 ### 2. The Capacity-Through-Beds Invariant
-Instead of executing complex cross-table aggregate subqueries during every student allocation to verify room capacity, HostelOS models physical beds as the atomic resource. 
+Instead of executing complex cross-table aggregate subqueries during every student allocation to verify room capacity, HostelFlow models physical beds as the atomic resource. 
 A `BEFORE INSERT` trigger on `beds` enforces that the number of physical beds in a room never exceeds the room's physical capacity. Uniqueness constraints on bed allocations then automatically prevent room over-occupancy.
 
 ### 3. Concurrency-Safe Transactional Orchestration
@@ -60,7 +60,7 @@ All core transitions (allocations, student transfers, payments) utilize transact
 ## 📁 Repository Structure
 
 ```
-hostel-management-system/
+hostel-services-platform/
 │
 ├── app/                         # Flask Web Application Root
 │   ├── __init__.py              # Application Factory
@@ -113,7 +113,7 @@ hostel-management-system/
 ### 1. Clone & Set Up Directory
 ```bash
 git clone <repository-url>
-cd hostel-management-system
+cd hostel-services-platform
 ```
 
 ### 2. Configure Virtual Environment
