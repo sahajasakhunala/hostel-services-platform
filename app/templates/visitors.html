@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Visitors - HostelFlow Administration{% endblock %}
+{% block page_title %}Gate Security Visitor Management{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Gate Security Logs</h2>
+    <button class="btn btn-primary" onclick="openCheckinModal()">+ Visitor Check-In</button>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Log ID</th>
+          <th>Visitor Name</th>
+          <th>Phone</th>
+          <th>Student Name</th>
+          <th>Reg Number</th>
+          <th>Purpose</th>
+          <th>Check-In Time</th>
+          <th>Check-Out Time</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="visitors-table-body">
+        <tr>
+          <td colspan="10" class="loading-state">Loading gate security logs...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Visitor Check-In Modal -->
+<div class="modal-overlay" id="checkin-modal">
+  <div class="modal-card">
+    <h3 style="margin-bottom: var(--space-4);">Visitor Check-In</h3>
+    <form id="checkin-form">
+      <div class="form-group">
+        <label class="form-label">Student ID (Host Resident)</label>
+        <input type="number" id="vis_student_id" class="form-control" placeholder="e.g. 1" required>
+      </div>
+
+      <div style="display: flex; gap: var(--space-3);">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Visitor Name</label>
+          <input type="text" id="vis_name" class="form-control" required>
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">Phone</label>
+          <input type="tel" id="vis_phone" class="form-control" required>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: var(--space-3);">
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">ID Type</label>
+          <select id="vis_id_type" class="form-control" required>
+            <option value="Aadhaar">Aadhaar Card</option>
+            <option value="PAN">PAN Card</option>
+            <option value="DrivingLicense">Driving License</option>
+            <option value="Passport">Passport</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label class="form-label">ID Number</label>
+          <input type="text" id="vis_id_number" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Purpose of Visit</label>
+        <input type="text" id="vis_purpose" class="form-control" placeholder="e.g. Family Visit" required>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-4);">
+        <button type="button" class="btn btn-secondary" onclick="closeCheckinModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Process Check-In</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/visitors.js') }}"></script>
+{% endblock %}
