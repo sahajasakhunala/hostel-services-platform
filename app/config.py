@@ -20,6 +20,9 @@ class Config:
     SESSION_COOKIE_SECURE = (os.environ.get('FLASK_ENV') == 'production')
     PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
 
+    # Request Body Payload Limits (16 MB maximum)
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+
     # Database Settings
     DB_HOST = os.environ.get('DB_HOST', 'localhost')
     DB_PORT = int(os.environ.get('DB_PORT', 3306))
