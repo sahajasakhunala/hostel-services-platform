@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}BI Reports - HostelFlow Administration{% endblock %}
+{% block page_title %}Business Intelligence & Analytical Reporting{% endblock %}
+
+{% block content %}
+<div class="grid-cards">
+  <!-- Report 1: Hostel Occupancy -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Hostel Occupancy Analysis</h2>
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Hostel</th>
+            <th>Gender</th>
+            <th>Beds</th>
+            <th>Occupied</th>
+            <th>Vacant</th>
+            <th>Occupancy %</th>
+          </tr>
+        </thead>
+        <tbody id="rpt-occupancy-body">
+          <tr><td colspan="6" class="loading-state">Loading report...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Report 2: Block Ranking -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Block Occupancy Ranking (ROW_NUMBER)</h2>
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Hostel</th>
+            <th>Block</th>
+            <th>Total Beds</th>
+            <th>Occupancy %</th>
+            <th>Rank</th>
+          </tr>
+        </thead>
+        <tbody id="rpt-block-rank-body">
+          <tr><td colspan="5" class="loading-state">Loading ranking...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Report 3: Outstanding Fee Debtor Ranking -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Outstanding Fee Debtor Ranking (DENSE_RANK)</h2>
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Student Name</th>
+            <th>Reg Number</th>
+            <th>Room Type</th>
+            <th>Outstanding Balance</th>
+            <th>Overdue Days</th>
+          </tr>
+        </thead>
+        <tbody id="rpt-fee-rank-body">
+          <tr><td colspan="6" class="loading-state">Loading fee rankings...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Report 4: Visitor Traffic Trends -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Visitor Gate Security Traffic</h2>
+    </div>
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Hostel</th>
+            <th>Total Visitors</th>
+            <th>Checked In</th>
+            <th>Checked Out</th>
+            <th>Avg Duration (Min)</th>
+          </tr>
+        </thead>
+        <tbody id="rpt-visitors-body">
+          <tr><td colspan="5" class="loading-state">Loading visitor trends...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}
