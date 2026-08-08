@@ -21,11 +21,15 @@ def create_app(config_name='development'):
     from app.routes.allocations import allocations_bp
     from app.routes.finance import finance_bp
     from app.routes.visitors import visitors_bp
+    from app.routes.complaints import complaints_bp
+    from app.routes.maintenance import maintenance_bp
     
     app.register_blueprint(students_bp, url_prefix='/api/students')
     app.register_blueprint(allocations_bp, url_prefix='/api/allocations')
     app.register_blueprint(finance_bp, url_prefix='/api/finance')
     app.register_blueprint(visitors_bp, url_prefix='/api/visitors')
+    app.register_blueprint(complaints_bp, url_prefix='/api/complaints')
+    app.register_blueprint(maintenance_bp, url_prefix='/api/maintenance')
     
     # Health check endpoint
     @app.route('/health', methods=['GET'])
