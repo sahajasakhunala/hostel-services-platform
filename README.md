@@ -1,4 +1,4 @@
-# HostelFlow 🏨
+# HostelFlow
 
 [![Database](https://img.shields.io/badge/Database-MySQL%209.7.1-blue?logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Backend](https://img.shields.io/badge/Backend-Python%203.10%20%7C%20Flask-green?logo=python&logoColor=white)](https://www.python.org/)
@@ -12,7 +12,7 @@ Specifically architected around **MySQL 9.7.1**, this system eliminates typical 
 
 ---
 
-## 🏗️ Architectural Core
+## Architectural Core
 
 The project implements a layered service-oriented architecture designed to handle concurrent operations safely:
 
@@ -39,7 +39,7 @@ The project implements a layered service-oriented architecture designed to handl
 
 ---
 
-## 🔬 Core Engineering Innovations
+## Core Engineering Innovations
 
 ### 1. State-Derived Structural Invariants (Generated Columns)
 To enforce that a student can have at most one active bed allocation, and a bed can host at most one active student, HostelFlow bypasses manual state synchronization. It uses MySQL virtual/stored generated columns that compute active keys dynamically from the allocation status:
@@ -57,7 +57,7 @@ All core transitions (allocations, student transfers, payments) utilize transact
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 hostel-services-platform/
@@ -103,7 +103,7 @@ hostel-services-platform/
 
 ---
 
-## 🚀 Getting Started (Development Setup)
+## Getting Started (Development Setup)
 
 ### Prerequisites
 * Python 3.10.x
@@ -140,5 +140,5 @@ The app will spin up locally on `http://localhost:5000`.
 
 ---
 
-## ⚖️ License
+## License
 Distributed under the MIT License. See `LICENSE` for details.
