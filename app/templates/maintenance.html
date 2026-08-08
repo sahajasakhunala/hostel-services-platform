@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Maintenance - HostelFlow Administration{% endblock %}
+{% block page_title %}Facility Repair & Maintenance Management{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Facility Repair Requests</h2>
+    <button class="btn btn-primary" onclick="openMaintenanceModal()">+ New Repair Request</button>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Req ID</th>
+          <th>Room</th>
+          <th>Hostel</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Cost (₹)</th>
+          <th>Reported At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="maintenance-table-body">
+        <tr>
+          <td colspan="9" class="loading-state">Loading repair requests...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- New Maintenance Request Modal -->
+<div class="modal-overlay" id="maint-modal">
+  <div class="modal-card">
+    <h3 style="margin-bottom: var(--space-4);">Create Facility Repair Request</h3>
+    <form id="maint-form">
+      <div class="form-group">
+        <label class="form-label">Room ID</label>
+        <input type="number" id="mnt_room_id" class="form-control" placeholder="e.g. 1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <input type="text" id="mnt_category" class="form-control" placeholder="e.g. Electrical / Plumbing" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="mnt_description" class="form-control" rows="3" placeholder="Describe repair issue" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select id="mnt_priority" class="form-control" required>
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-4);">
+        <button type="button" class="btn btn-secondary" onclick="closeMaintenanceModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Request</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/maintenance.js') }}"></script>
+{% endblock %}
