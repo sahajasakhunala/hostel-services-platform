@@ -9,23 +9,24 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """POST /api/auth/login - Authenticate user credentials and start session."""
+    data = request.get_json(silent=True) or {}
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        log_security_event('AUTH_LOGIN_FAILURE', {'username': username, 'reason': 'Missing credentials'})
+        return jsonify({'status': 'error', 'message': 'Username and password are required.'}), 400
+
     try:
-        data = request.get_json()
-        if not data:
-            log_security_event('AUTH_LOGIN_FAILURE', {'reason': 'Empty or invalid JSON payload'})
-            return jsonify({'status': 'error', 'message': 'Request payload must be valid JSON.'}), 400
-
-        username = data.get('username')
-        password = data.get('password')
-
         user_data = AuthService.login(username, password)
         log_security_event('AUTH_LOGIN_SUCCESS', {'username': username, 'user_id': user_data.get('user_id')})
         return jsonify({'status': 'success', 'message': 'Login successful.', 'data': user_data}), 200
     except ValueError as ve:
-        log_security_event('AUTH_LOGIN_FAILURE', {'username': data.get('username') if data else None, 'reason': str(ve)})
+        log_security_event('AUTH_LOGIN_FAILURE', {'username': username, 'reason': str(ve)})
         return jsonify({'status': 'error', 'message': str(ve)}), 401
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        log_security_event('AUTH_LOGIN_FAILURE', {'username': username, 'reason': str(e)})
+        return jsonify({'status': 'error', 'message': 'Authentication failed due to server error.'}), 401
 
 
 @auth_bp.route('/logout', methods=['POST'])
