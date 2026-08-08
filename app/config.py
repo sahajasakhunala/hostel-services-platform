@@ -8,16 +8,14 @@ load_dotenv()
 
 class Config:
     """Base application configuration."""
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    if not SECRET_KEY:
-        if os.environ.get('FLASK_ENV') == 'production':
-            raise RuntimeError("CRITICAL SECURITY ERROR: SECRET_KEY must be set in production environment!")
-        SECRET_KEY = 'dev-secret-key-hostelflow-local-only'
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-hostelflow-local-only')
+    FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
+    IS_DEV = False
 
     # Session & Cookie Security Controls
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = (os.environ.get('FLASK_ENV') == 'production')
+    SESSION_COOKIE_SECURE = False
     PERMANENT_SESSION_LIFETIME = timedelta(hours=2)
 
     # Request Body Payload Limits (16 MB maximum)
@@ -38,18 +36,34 @@ class DevelopmentConfig(Config):
     """Development environment configuration."""
     DEBUG = True
     TESTING = False
+    IS_DEV = True
+    FLASK_ENV = 'development'
+    SESSION_COOKIE_SECURE = False
 
 
 class TestingConfig(Config):
     """Testing environment configuration."""
     DEBUG = False
     TESTING = True
+    IS_DEV = True
+    FLASK_ENV = 'testing'
+    SESSION_COOKIE_SECURE = False
     DB_NAME = os.environ.get('TEST_DB_NAME', 'hostelflow_db')
+
+
+class ProductionConfig(Config):
+    """Production environment configuration."""
+    DEBUG = False
+    TESTING = False
+    IS_DEV = False
+    FLASK_ENV = 'production'
+    SESSION_COOKIE_SECURE = True
+    SECRET_KEY = os.environ.get('SECRET_KEY', '')
 
 
 config_by_name = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
+    'production': ProductionConfig,
     'default': DevelopmentConfig
 }
-

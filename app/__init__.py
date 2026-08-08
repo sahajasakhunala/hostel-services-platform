@@ -2,6 +2,7 @@ from flask import Flask, g, jsonify
 from app.config import config_by_name
 from app.db.connection import close_db_connection
 from app.utils.logging import get_request_id, log_exception
+from app.utils.config_validation import validate_config
 
 
 def create_app(config_name='development'):
@@ -12,8 +13,12 @@ def create_app(config_name='development'):
     app = Flask(__name__)
     
     # Load environment configuration
-    app.config.from_object(config_by_name.get(config_name, config_by_name['default']))
+    target_config = config_by_name.get(config_name, config_by_name['default'])
+    app.config.from_object(target_config)
     
+    # Fail-Fast Startup Configuration Validation
+    validate_config(app.config, env_name=config_name)
+
     # Register request teardown database cleanup
     app.teardown_appcontext(close_db_connection)
     
