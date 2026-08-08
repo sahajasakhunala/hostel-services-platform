@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HostelFlow Administration{% endblock %}</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Sidebar Navigation Shell -->
+  <aside class="app-sidebar">
+    <div class="sidebar-header">
+      <div>
+        <div class="brand-title">HostelFlow</div>
+        <div class="brand-subtitle">Platform Administration</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/dashboard" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" data-roles="administrator, warden, security staff, maintenance staff, student">
+        Dashboard
+      </a>
+      <a href="/students" class="nav-item {% if active_page == 'students' %}active{% endif %}" data-roles="administrator, warden">
+        Students
+      </a>
+      <a href="/allocations" class="nav-item {% if active_page == 'allocations' %}active{% endif %}" data-roles="administrator, warden">
+        Allocations
+      </a>
+      <a href="/finance" class="nav-item {% if active_page == 'finance' %}active{% endif %}" data-roles="administrator, warden, student">
+        Finance & Fees
+      </a>
+      <a href="/visitors" class="nav-item {% if active_page == 'visitors' %}active{% endif %}" data-roles="administrator, warden, security staff">
+        Visitors
+      </a>
+      <a href="/complaints" class="nav-item {% if active_page == 'complaints' %}active{% endif %}" data-roles="administrator, warden, student">
+        Complaints
+      </a>
+      <a href="/maintenance" class="nav-item {% if active_page == 'maintenance' %}active{% endif %}" data-roles="administrator, warden, maintenance staff">
+        Maintenance
+      </a>
+      <a href="/reports" class="nav-item {% if active_page == 'reports' %}active{% endif %}" data-roles="administrator, warden">
+        BI Reports
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Body Content -->
+  <main class="app-main">
+    <header class="app-header">
+      <h1 class="header-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      <div class="header-user">
+        <span class="user-badge" id="header-role-badge">Session Active</span>
+        <span id="header-username" style="font-weight: 500; font-size: var(--font-size-sm);">User</span>
+        <button class="btn btn-secondary" onclick="AuthHelper.logout()" style="padding: 4px 12px; font-size: 12px;">Logout</button>
+      </div>
+    </header>
+
+    <div class="app-content">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<!-- Central Scripts -->
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AuthHelper.init();
+  });
+</script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

@@ -17,6 +17,7 @@ def create_app(config_name='development'):
     app.teardown_appcontext(close_db_connection)
     
     # Register Blueprints
+    from app.routes.views import views_bp
     from app.routes.auth import auth_bp
     from app.routes.students import students_bp
     from app.routes.allocations import allocations_bp
@@ -26,6 +27,7 @@ def create_app(config_name='development'):
     from app.routes.maintenance import maintenance_bp
     from app.routes.reports import reports_bp
     
+    app.register_blueprint(views_bp, url_prefix='')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(students_bp, url_prefix='/api/students')
     app.register_blueprint(allocations_bp, url_prefix='/api/allocations')
