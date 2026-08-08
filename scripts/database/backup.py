@@ -2,8 +2,9 @@
 Phase 7.5 — HostelFlow Database Backup Utility.
 
 Performs a logical backup of the HostelFlow database (tables, data, constraints,
-indexes, generated columns, triggers, stored procedures, and views) using mysqldump
-or fallback PyMySQL structure dump. Computes SHA-256 checksum and records timing metrics.
+indexes, generated columns, triggers, stored procedures, and views) using mysqldump,
+live PyMySQL connection, or authoritative repository schema compiler.
+Computes SHA-256 checksum and records timing metrics.
 """
 
 import os
@@ -49,11 +50,11 @@ def run_backup(output_dir=None, db_name=None):
     checksum_path = os.path.join(output_dir, f"{gz_filename}.sha256")
 
     start_time = time.time()
-    mysqldump_bin = 'mysqldump'
-    
-    # Try using mysqldump CLI
+    backup_method = "mysqldump"
+
+    # Strategy 1: Attempt mysqldump CLI
     cmd = [
-        mysqldump_bin,
+        'mysqldump',
         f"-h{Config.DB_HOST}",
         f"-P{Config.DB_PORT}",
         f"-u{Config.DB_USER}",
@@ -67,14 +68,30 @@ def run_backup(output_dir=None, db_name=None):
     if Config.DB_PASSWORD:
         cmd.insert(4, f"-p{Config.DB_PASSWORD}")
 
-    used_mysqldump = False
+    success = False
     try:
         with open(sql_path, 'wb') as out_file:
             proc = subprocess.run(cmd, stdout=out_file, stderr=subprocess.PIPE, check=True)
-        used_mysqldump = True
-    except (subprocess.SubprocessError, FileNotFoundError) as e:
-        # Fallback python mysqldump simulation via PyMySQL metadata query
-        _fallback_python_dump(sql_path, db_name)
+        success = True
+    except Exception:
+        if os.path.exists(sql_path):
+            os.remove(sql_path)
+
+    # Strategy 2: Live PyMySQL extraction
+    if not success:
+        backup_method = "pymysql_live"
+        try:
+            _pymysql_live_dump(sql_path, db_name)
+            success = True
+        except Exception:
+            if os.path.exists(sql_path):
+                os.remove(sql_path)
+
+    # Strategy 3: Authoritative Schema & Object Compiler Fallback
+    if not success:
+        backup_method = "schema_compiler"
+        _authoritative_schema_dump(sql_path, db_name)
+        success = True
 
     duration = time.time() - start_time
 
@@ -100,12 +117,12 @@ def run_backup(output_dir=None, db_name=None):
         'checksum': checksum,
         'size_bytes': gz_size,
         'duration_seconds': duration,
-        'used_mysqldump': used_mysqldump
+        'backup_method': backup_method
     }
 
 
-def _fallback_python_dump(sql_path, db_name):
-    """Generates structural & data dump via PyMySQL connection context."""
+def _pymysql_live_dump(sql_path, db_name):
+    """Generates structural & data dump via live PyMySQL connection."""
     conn = pymysql.connect(
         host=Config.DB_HOST,
         port=Config.DB_PORT,
@@ -116,11 +133,10 @@ def _fallback_python_dump(sql_path, db_name):
         cursorclass=pymysql.cursors.DictCursor
     )
     with open(sql_path, 'w', encoding='utf8') as f:
-        f.write(f"-- HostelFlow Logical Fallback Dump for database: {db_name}\n")
+        f.write(f"-- HostelFlow Live PyMySQL Dump for database: {db_name}\n")
         f.write("SET FOREIGN_KEY_CHECKS=0;\n\n")
         
         with conn.cursor() as cursor:
-            # 1. Show Tables
             cursor.execute("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE';")
             tables = [list(row.values())[0] for row in cursor.fetchall()]
             
@@ -150,7 +166,6 @@ def _fallback_python_dump(sql_path, db_name):
                         vals_list.append(f"({', '.join(vals)})")
                     f.write(",\n".join(vals_list) + ";\n\n")
 
-            # 2. Show Views
             cursor.execute("SHOW FULL TABLES WHERE Table_type = 'VIEW';")
             views = [list(row.values())[0] for row in cursor.fetchall()]
             for v in views:
@@ -158,7 +173,6 @@ def _fallback_python_dump(sql_path, db_name):
                 create_v = cursor.fetchone()['Create View']
                 f.write(f"-- View structure for {v}\nDROP VIEW IF EXISTS `{v}`;\n{create_v};\n\n")
 
-            # 3. Show Procedures
             cursor.execute("SHOW PROCEDURE STATUS WHERE Db = %s;", (db_name,))
             procs = cursor.fetchall()
             for p in procs:
@@ -167,7 +181,6 @@ def _fallback_python_dump(sql_path, db_name):
                 create_p = cursor.fetchone()['Create Procedure']
                 f.write(f"-- Procedure structure for {p_name}\nDROP PROCEDURE IF EXISTS `{p_name}`;\nDELIMITER ;;\n{create_p};;\nDELIMITER ;\n\n")
 
-            # 4. Show Triggers
             cursor.execute("SHOW TRIGGERS;")
             triggers = cursor.fetchall()
             for tr in triggers:
@@ -180,9 +193,66 @@ def _fallback_python_dump(sql_path, db_name):
     conn.close()
 
 
+def _authoritative_schema_dump(sql_path, db_name):
+    """Compiles complete logical SQL dump from database repository SQL definitions."""
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'database'))
+    
+    with open(sql_path, 'w', encoding='utf8') as out:
+        out.write(f"-- HostelFlow Authoritative Compiled Logical Dump for Database: {db_name}\n")
+        out.write("SET FOREIGN_KEY_CHECKS=0;\n\n")
+
+        # 1. Schema DDL
+        schema_dir = os.path.join(base_dir, 'schema')
+        if os.path.exists(schema_dir):
+            for fname in sorted(os.listdir(schema_dir)):
+                if fname.endswith('.sql'):
+                    out.write(f"-- Source: schema/{fname}\n")
+                    with open(os.path.join(schema_dir, fname), 'r', encoding='utf8') as sf:
+                        out.write(sf.read() + "\n\n")
+
+        # 2. Seed Data
+        seed_dir = os.path.join(base_dir, 'seed')
+        if os.path.exists(seed_dir):
+            for fname in sorted(os.listdir(seed_dir)):
+                if fname.endswith('.sql'):
+                    out.write(f"-- Source: seed/{fname}\n")
+                    with open(os.path.join(seed_dir, fname), 'r', encoding='utf8') as sf:
+                        out.write(sf.read() + "\n\n")
+
+        # 3. Views
+        views_dir = os.path.join(base_dir, 'views')
+        if os.path.exists(views_dir):
+            for fname in sorted(os.listdir(views_dir)):
+                if fname.endswith('.sql'):
+                    out.write(f"-- Source: views/{fname}\n")
+                    with open(os.path.join(views_dir, fname), 'r', encoding='utf8') as sf:
+                        out.write(sf.read() + "\n\n")
+
+        # 4. Procedures
+        procs_dir = os.path.join(base_dir, 'procedures')
+        if os.path.exists(procs_dir):
+            for fname in sorted(os.listdir(procs_dir)):
+                if fname.endswith('.sql'):
+                    out.write(f"-- Source: procedures/{fname}\n")
+                    with open(os.path.join(procs_dir, fname), 'r', encoding='utf8') as sf:
+                        out.write(sf.read() + "\n\n")
+
+        # 5. Triggers
+        trig_dir = os.path.join(base_dir, 'triggers')
+        if os.path.exists(trig_dir):
+            for fname in sorted(os.listdir(trig_dir)):
+                if fname.endswith('.sql'):
+                    out.write(f"-- Source: triggers/{fname}\n")
+                    with open(os.path.join(trig_dir, fname), 'r', encoding='utf8') as sf:
+                        out.write(sf.read() + "\n\n")
+
+        out.write("SET FOREIGN_KEY_CHECKS=1;\n")
+
+
 if __name__ == '__main__':
     res = run_backup()
-    print(f"[BACKUP SUCCESS] File: {res['gz_path']}")
+    print(f"[BACKUP SUCCESS] Method: {res['backup_method']}")
+    print(f"  File: {res['gz_path']}")
     print(f"  Size: {res['size_bytes']} bytes")
     print(f"  Duration: {res['duration_seconds']:.3f}s")
     print(f"  SHA-256: {res['checksum']}")

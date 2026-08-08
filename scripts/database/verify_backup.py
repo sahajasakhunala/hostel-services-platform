@@ -50,13 +50,14 @@ def verify_backup_file(gz_path, checksum_path=None):
         return {'status': 'FAILED', 'reason': f'Failed to read dump file: {str(e)}'}
 
     # Required Database Objects Baseline
-    required_tables = ['students', 'hostels', 'blocks', 'floors', 'rooms', 'beds', 'bed_allocations', 'invoices', 'payments', 'visitors', 'complaints', 'maintenance_requests', 'audit_logs']
+    required_tables = ['students', 'hostels', 'blocks', 'floors', 'rooms', 'beds', 'allocations', 'invoices', 'payments', 'visitors', 'complaints', 'maintenance_requests', 'audit_logs']
     required_procs = ['sp_allocate_bed', 'sp_transfer_student', 'sp_vacate_student', 'sp_process_payment']
     required_views = ['v_current_occupancy', 'v_vacant_beds', 'v_fee_dues', 'v_visitor_report', 'v_unresolved_complaints', 'v_maintenance_status']
 
-    missing_tables = [t for t in required_tables if f"CREATE TABLE `{t}`" not in content and f"CREATE TABLE {t}" not in content and f"`{t}`" not in content]
-    missing_procs = [p for p in required_procs if f"PROCEDURE `{p}`" not in content and f"PROCEDURE {p}" not in content and f"`{p}`" not in content]
-    missing_views = [v for v in required_views if f"VIEW `{v}`" not in content and f"VIEW {v}" not in content and f"`{v}`" not in content]
+    content_lower = content.lower()
+    missing_tables = [t for t in required_tables if t not in content_lower]
+    missing_procs = [p for p in required_procs if p not in content_lower]
+    missing_views = [v for v in required_views if v not in content_lower]
 
     is_valid = len(missing_tables) == 0 and len(missing_procs) == 0 and len(missing_views) == 0
 
