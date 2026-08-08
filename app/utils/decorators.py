@@ -63,6 +63,7 @@ def student_ownership_required(f):
     """
     Decorator enforcing resource ownership authorization for student endpoints.
     Allows access if user is Admin/Warden OR if student_id matches session['student_id'].
+    Checks path parameters (kwargs), query string (request.args), and JSON payload (request.get_json()).
     Returns HTTP 403 Forbidden if attempting unauthorized access to another student's data.
     """
     @wraps(f)
@@ -76,12 +77,23 @@ def student_ownership_required(f):
         if is_admin_or_warden:
             return f(*args, **kwargs)
 
+        # Normalize target student ID extraction from path, query string, or JSON body
         target_student_id = kwargs.get('student_id')
+        if target_student_id is None:
+            target_student_id = request.args.get('student_id')
+        if target_student_id is None and request.is_json and request.get_json(silent=True):
+            json_body = request.get_json(silent=True) or {}
+            target_student_id = json_body.get('student_id')
+
         session_student_id = session.get('student_id')
 
         if target_student_id is not None and session_student_id is not None:
-            if int(target_student_id) == int(session_student_id):
-                return f(*args, **kwargs)
+            try:
+                if int(target_student_id) == int(session_student_id):
+                    return f(*args, **kwargs)
+            except (ValueError, TypeError):
+                pass
 
         return jsonify({'status': 'error', 'message': 'Access forbidden: You cannot view or modify data belonging to another student.'}), 403
     return decorated_function
+
