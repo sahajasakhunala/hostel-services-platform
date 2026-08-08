@@ -1,5 +1,6 @@
 from functools import wraps
 from flask import session, jsonify, request
+from app.utils.logging import log_security_event
 
 
 def login_required(f):
@@ -10,6 +11,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session or session['user_id'] is None:
+            log_security_event('AUTH_UNAUTHENTICATED_ACCESS', {'target_endpoint': request.path})
             return jsonify({'status': 'error', 'message': 'Authentication required. Please log in.'}), 401
         return f(*args, **kwargs)
     return decorated_function
@@ -25,6 +27,7 @@ def role_required(*allowed_roles):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if 'user_id' not in session or session['user_id'] is None:
+                log_security_event('AUTH_UNAUTHENTICATED_ACCESS', {'target_endpoint': request.path})
                 return jsonify({'status': 'error', 'message': 'Authentication required. Please log in.'}), 401
 
             user_roles = [r.lower() for r in session.get('roles', [])]
@@ -52,6 +55,11 @@ def role_required(*allowed_roles):
             has_access = any(r in expanded_permitted for r in user_roles)
 
             if not has_access:
+                log_security_event('AUTHZ_ACCESS_DENIED', {
+                    'required_roles': list(allowed_roles),
+                    'user_roles': user_roles,
+                    'target_endpoint': request.path
+                })
                 return jsonify({'status': 'error', 'message': 'Access forbidden: Insufficient role permissions.'}), 403
 
             return f(*args, **kwargs)
@@ -69,6 +77,7 @@ def student_ownership_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session or session['user_id'] is None:
+            log_security_event('AUTH_UNAUTHENTICATED_ACCESS', {'target_endpoint': request.path})
             return jsonify({'status': 'error', 'message': 'Authentication required. Please log in.'}), 401
 
         user_roles = [r.lower() for r in session.get('roles', [])]
@@ -94,6 +103,10 @@ def student_ownership_required(f):
             except (ValueError, TypeError):
                 pass
 
+        log_security_event('AUTHZ_OWNERSHIP_DENIED', {
+            'target_student_id': target_student_id,
+            'session_student_id': session_student_id,
+            'target_endpoint': request.path
+        })
         return jsonify({'status': 'error', 'message': 'Access forbidden: You cannot view or modify data belonging to another student.'}), 403
     return decorated_function
-

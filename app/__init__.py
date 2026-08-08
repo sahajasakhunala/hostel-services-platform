@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, g, jsonify
 from app.config import config_by_name
 from app.db.connection import close_db_connection
+from app.utils.logging import get_request_id, log_exception
 
 
 def create_app(config_name='development'):
@@ -16,6 +17,11 @@ def create_app(config_name='development'):
     # Register request teardown database cleanup
     app.teardown_appcontext(close_db_connection)
     
+    # Request Correlation ID Middleware
+    @app.before_request
+    def assign_request_correlation_id():
+        get_request_id()
+
     # Register Blueprints
     from app.routes.views import views_bp
     from app.routes.auth import auth_bp
@@ -37,18 +43,20 @@ def create_app(config_name='development'):
     app.register_blueprint(maintenance_bp, url_prefix='/api/maintenance')
     app.register_blueprint(reports_bp, url_prefix='/api/reports')
 
-    # Security Headers Middleware
+    # Security Headers & Correlation Header Middleware
     @app.after_request
-    def set_security_headers(response):
+    def set_security_and_correlation_headers(response):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        if hasattr(g, 'request_id') and g.request_id:
+            response.headers['X-Request-ID'] = g.request_id
         return response
 
-    # Global Centralized Error Handlers (Prevents Database Traceback Information Leakage)
+    # Global Centralized Error Handlers
     @app.errorhandler(500)
     def handle_internal_server_error(e):
-        app.logger.error(f"Internal Server Error: {str(e)}", exc_info=True)
+        log_exception("SERVER_INTERNAL_ERROR", exc_info=True)
         return jsonify({'status': 'error', 'message': 'An internal server error occurred.'}), 500
 
     @app.errorhandler(404)
@@ -65,4 +73,3 @@ def create_app(config_name='development'):
         return {'status': 'healthy', 'service': 'HostelFlow API', 'version': '1.0.0'}, 200
 
     return app
-
