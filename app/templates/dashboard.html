@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - HostelFlow Administration{% endblock %}
+{% block page_title %}Operational Dashboard{% endblock %}
+
+{% block content %}
+<!-- KPI Stat Cards Grid -->
+<div class="grid-stats">
+  <div class="stat-card">
+    <div class="stat-label">Total Resident Beds</div>
+    <div class="stat-value" id="kpi-total-beds">--</div>
+    <div class="stat-meta" id="kpi-occupied-beds">-- Occupied</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Overall Occupancy</div>
+    <div class="stat-value" id="kpi-occupancy-rate">--%</div>
+    <div class="stat-meta" id="kpi-vacant-beds">-- Vacant</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Total Outstanding Fees</div>
+    <div class="stat-value" id="kpi-outstanding-fees">₹0</div>
+    <div class="stat-meta">Across All Hostels</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Unresolved Issues</div>
+    <div class="stat-value" id="kpi-unresolved-issues">--</div>
+    <div class="stat-meta" id="kpi-pending-maint">-- Complaints / -- Maintenance</div>
+  </div>
+</div>
+
+<!-- Operational Summary Table Card -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Hostel Cross-Domain Operational Summary</h2>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Hostel Name</th>
+          <th>Gender Type</th>
+          <th>Total Beds</th>
+          <th>Occupied</th>
+          <th>Occupancy %</th>
+          <th>Outstanding Fees</th>
+          <th>Open Complaints</th>
+          <th>Pending Maintenance</th>
+        </tr>
+      </thead>
+      <tbody id="summary-table-body">
+        <tr>
+          <td colspan="8" class="loading-state">Loading operational summary data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
