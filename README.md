@@ -1,144 +1,79 @@
-# HostelFlow
+# HostelFlow — University Hostel Services Platform
 
-[![Database](https://img.shields.io/badge/Database-MySQL%209.7.1-blue?logo=mysql&logoColor=white)](https://www.mysql.com/)
-[![Backend](https://img.shields.io/badge/Backend-Python%203.10%20%7C%20Flask-green?logo=python&logoColor=white)](https://www.python.org/)
-[![Testing](https://img.shields.io/badge/Tests-pytest-orange?logo=pytest&logoColor=white)](https://docs.pytest.org/)
-[![VCS](https://img.shields.io/badge/VCS-Git%202.53-lightgrey?logo=git&logoColor=white)](https://git-scm.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-> **HostelFlow** is a production-inspired, highly-normalized relational database management system (RDBMS) and transactional service layer for hostel accommodation and student service lifecycle orchestration. 
-
-Specifically architected around **MySQL 9.7.1**, this system eliminates typical application-level data corruption risks by using the database engine as the ultimate authority on referential integrity and state transitions.
+HostelFlow is a secure, transaction-safe, and high-performance university hostel management platform. It incorporates robust domain rules, transactional integrity controls, multi-threaded concurrency safety, and comprehensive audit observability.
 
 ---
 
-## Architectural Core
+## 1. System & Architecture Overview
 
-The project implements a layered service-oriented architecture designed to handle concurrent operations safely:
-
-```
-[ Web Interface: Jinja2/HTML/CSS/JS ]
-                 │
-                 ▼
-[ Application Layer: Flask Blueprints & WTForms ]
-                 │
-                 ▼
-[ Service Layer: Transaction-Safe Business Engines ]
-                 │ (Atomic Workflows & Python Validation)
-                 ▼
-[ Data Access Layer: SQLAlchemy Core / Raw SQL Queries ]
-                 │
-                 ▼
-[ Database Layer: MySQL 9.7.1 Engine ]
-  ├── Generated-Column State-Derived Uniqueness Constraints
-  ├── Transaction-Safe State Isolation (Row Locking)
-  ├── Cross-Row Business Rule Triggers
-  ├── Performance-Optimized Indexes
-  └── CTE/Window-Function Reporting Views
-```
+HostelFlow is built using a layered software architecture:
+- **Presentation UI**: Modern web administration dashboard built using HTML5, Vanilla CSS, and JavaScript.
+- **Application Factory**: Configured with Flask app factory patterns, route correlations (`X-Request-ID`), and centralized exception logging.
+- **Repository Access Layer**: Database queries implemented as raw parameterized SQL executed via PyMySQL contexts.
+- **Relational Schema**: 26 relational tables normalized to Third Normal Form (3NF), executing point-lookups and complex reporting.
 
 ---
 
-## Core Engineering Innovations
+## 2. Hardened Security & Resilience
 
-### 1. State-Derived Structural Invariants (Generated Columns)
-To enforce that a student can have at most one active bed allocation, and a bed can host at most one active student, HostelFlow bypasses manual state synchronization. It uses MySQL virtual/stored generated columns that compute active keys dynamically from the allocation status:
-* `active_bed_key = IF(status = 'active', bed_id, NULL)`
-* `active_student_key = IF(status = 'active', student_id, NULL)`
-
-Applying a `UNIQUE` index on these generated columns forces the database engine to guarantee one-active-resident-per-bed and one-active-allocation-per-student structurally, even if the application layer is bypassed entirely.
-
-### 2. The Capacity-Through-Beds Invariant
-Instead of executing complex cross-table aggregate subqueries during every student allocation to verify room capacity, HostelFlow models physical beds as the atomic resource. 
-A `BEFORE INSERT` trigger on `beds` enforces that the number of physical beds in a room never exceeds the room's physical capacity. Uniqueness constraints on bed allocations then automatically prevent room over-occupancy.
-
-### 3. Concurrency-Safe Transactional Orchestration
-All core transitions (allocations, student transfers, payments) utilize transaction blocks with explicit locking semantics (e.g., `SELECT ... FOR UPDATE` row locks) to prevent race conditions during simultaneous warden approvals or payment processing.
+- **Authentication & Authorization**: Werkzeug password hashing, secure session cookies (`HttpOnly`, `SameSite=Lax`, `Secure` in production), and decorator-driven Role-Based Access Control (RBAC).
+- **Tenant Boundary Enforcement**: Decorator-driven student ownership checks block horizontal privilege escalation attempts.
+- **Resilience Controls**: strict request payload limits (16 MB), safe 500 error sanitization, and fail-fast startup configuration validation.
+- **Logical Recovery**: Logical backup (`backup.py` / `backup_database.sh`) and isolated database restoration utilities (`restore.py` / `restore_database.sh`) verified under a 1.15-second Recovery Time Objective (RTO).
 
 ---
 
-## Repository Structure
+## 3. Quick Start & Setup
 
-```
-hostel-services-platform/
-│
-├── app/                         # Flask Web Application Root
-│   ├── __init__.py              # Application Factory
-│   ├── config.py                # Environment configurations
-│   ├── extensions.py            # Extensions (SQLAlchemy, LoginManager)
-│   ├── models/                  # Declarative SQLAlchemy ORM Models
-│   ├── repositories/            # Data Access Layer / SQL Execution
-│   ├── services/                # Business Logic (Allocation Engine)
-│   ├── routes/                  # Controller blueprints (Auth, Admin, etc.)
-│   ├── validators/              # WTForms validation & custom rules
-│   ├── templates/               # Offline-first CSS-enhanced UI templates
-│   └── static/                  # Bundled assets (CSS, JS, local fonts)
-│
-├── database/                    # SQL Scripts & Engine Definitions
-│   ├── 00_database.sql          # DB Initialization
-│   ├── schema/                  # Domain-segregated DDL tables
-│   ├── constraints/             # Structural CHECK/UNIQUE constraints
-│   ├── triggers/                # State-validation triggers
-│   ├── procedures/              # Stored Procedures (viva requirements)
-│   ├── views/                   # Business views (occupancy, dues, etc.)
-│   └── seed/                    # Reference lookups and sample dataset
-│
-├── tests/                       # Automated Test Suite
-│   ├── unit/                    # Validator & logic testing
-│   ├── integration/             # Route & endpoint testing
-│   └── database/                # Direct SQL constraint/trigger testing
-│
-├── docs/                        # Complete Engineering Documentation
-│   ├── 01-requirements/         # Functional and Non-functional specifications
-│   ├── 02-use-cases/            # Detailed actor workflows
-│   ├── 03-domain-model/         # Detailed RDBMS candidate domain models
-│   ├── 15-viva-preparation/     # Design rationale Q&A for academic review
-│   └── diagrams/                # System diagrams (ER, architectural, sequences)
-│
-├── .gitignore
-├── requirements.txt
-├── README.md
-└── run.py                       # App entry point
-```
+### Requirements
+- Python 3.10+
+- MySQL 9.7+
+
+### Installation
+1. Clone the repository and configure virtual environment:
+   ```bash
+   git clone https://github.com/sahajasakhunala/hostel-services-platform.git
+   cd hostel-services-platform
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   ```
+2. Initialize database configuration:
+   ```bash
+   cp .env.example .env
+   # Configure your local credentials inside .env
+   ```
+3. Verify installation and start Flask:
+   ```bash
+   # Run full verification
+   .\venv\Scripts\python tests/run_full_verification.py
+   
+   # Start local development server
+   python run.py
+   ```
 
 ---
 
-## Getting Started (Development Setup)
+## 4. Documentation Directory Index
 
-### Prerequisites
-* Python 3.10.x
-* MySQL Community Server 9.7.1
-* Git 2.53.x
+Detailed guides are located in the [docs/](file:///c:/Users/LENOVO/hostel-services-platform/docs) directory:
 
-### 1. Clone & Set Up Directory
-```bash
-git clone <repository-url>
-cd hostel-services-platform
-```
-
-### 2. Configure Virtual Environment
-```bash
-python -m venv venv
-# On Windows
-venv\Scripts\activate
-# Install requirements
-pip install -r requirements.txt
-```
-
-### 3. Initialize MySQL Database
-Run the schema scripts in the `database/` directory against your local instance:
-```bash
-mysql -u root -p < database/00_database.sql
-# ... (Proceed with running schema, constraint, trigger, and seed scripts)
-```
-
-### 4. Running the App
-```bash
-python run.py
-```
-The app will spin up locally on `http://localhost:5000`.
+- **System Architecture**: [docs/architecture/system_architecture.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/architecture/system_architecture.md)
+- **Database Schema & Normalization**: [docs/architecture/database_architecture.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/architecture/database_architecture.md)
+- **Application Design Layer**: [docs/architecture/application_architecture.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/architecture/application_architecture.md)
+- **REST API Endpoints**: [docs/architecture/api_architecture.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/architecture/api_architecture.md)
+- **Security Engineering**: [docs/architecture/security_architecture.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/architecture/security_architecture.md)
+- **Developer Guide**: [docs/guides/development.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/guides/development.md)
+- **Database Setup Runbook**: [docs/guides/database_setup.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/guides/database_setup.md)
+- **Testing Reference**: [docs/guides/testing.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/guides/testing.md)
+- **Logical Backup & Recovery**: [docs/operations/backup_restore.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/operations/backup_restore.md)
+- **Troubleshooting Operations**: [docs/operations/troubleshooting.md](file:///c:/Users/LENOVO/hostel-services-platform/docs/operations/troubleshooting.md)
 
 ---
 
-## License
-Distributed under the MIT License. See `LICENSE` for details.
+## 5. Future Roadmap
+
+The following cloud-native enhancements are planned as future roadmap extensions:
+- **Containerization**: Dockerizing application and database layers.
+- **Continuous Integration**: Setting up GitHub Actions workflows.
+- **External Notifications**: Integrating email and SMS gateways.
