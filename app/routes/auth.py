@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.services.auth_service import AuthService
 from app.utils.decorators import login_required
 from app.utils.logging import log_security_event, log_app_event
+from app.utils.auth import validate_password_strength
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -27,6 +28,46 @@ def login():
     except Exception as e:
         log_security_event('AUTH_LOGIN_FAILURE', {'username': username, 'reason': str(e)})
         return jsonify({'status': 'error', 'message': 'Authentication failed due to server error.'}), 401
+
+
+@auth_bp.route('/register', methods=['POST'])
+def register():
+    """POST /api/auth/register - Register a new user account with secure password hashing."""
+    data = request.get_json(silent=True) or {}
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({'status': 'error', 'message': 'Username and password are required.'}), 400
+
+    username = username.strip()
+    if len(username) < 3:
+        return jsonify({'status': 'error', 'message': 'Username must be at least 3 characters long.'}), 400
+
+    # Validate password complexity
+    is_valid, err_msg = validate_password_strength(password)
+    if not is_valid:
+        return jsonify({'status': 'error', 'message': err_msg}), 400
+
+    try:
+        new_user = AuthService.register_user(
+            username=username,
+            password=password,
+            student_id=data.get('student_id'),
+            staff_id=data.get('staff_id'),
+            role_ids=data.get('role_ids', [1])  # Default to Administrator/User role
+        )
+        log_security_event('AUTH_ACCOUNT_REGISTERED', {'username': username, 'user_id': new_user.get('user_id')})
+        return jsonify({
+            'status': 'success',
+            'message': 'Account created successfully with encrypted password protection. You can now log in.',
+            'data': {'username': new_user['username'], 'user_id': new_user['user_id']}
+        }), 201
+    except ValueError as ve:
+        return jsonify({'status': 'error', 'message': str(ve)}), 409
+    except Exception as e:
+        log_security_event('AUTH_REGISTER_ERROR', {'username': username, 'reason': str(e)})
+        return jsonify({'status': 'error', 'message': 'Account creation failed due to database server error.'}), 500
 
 
 @auth_bp.route('/logout', methods=['POST'])

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - HostelFlow</title>
+  <title>Authentication - HostelFlow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,63 +15,200 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      min-height: 100vh;
       background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
     }
-    .login-card {
+    .auth-card {
       width: 100%;
-      max-width: 400px;
-      background: var(--glass-bg);
-      backdrop-filter: var(--backdrop-blur);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-8);
-      box-shadow: var(--shadow-lg);
+      max-width: 440px;
+      background: var(--glass-bg, rgba(30, 41, 59, 0.8));
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+      border-radius: var(--radius-lg, 16px);
+      padding: 32px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
-    .login-brand {
+    .auth-brand {
       text-align: center;
-      margin-bottom: var(--space-6);
+      margin-bottom: 24px;
     }
-    .login-brand h2 {
-      font-size: var(--font-size-2xl);
-      font-weight: var(--font-weight-bold);
-      color: var(--text-primary);
+    .auth-brand h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 0;
     }
-    .login-brand p {
-      font-size: var(--font-size-xs);
-      color: var(--text-muted);
-      margin-top: var(--space-1);
+    .auth-brand p {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .auth-tabs {
+      display: flex;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #94a3b8;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .auth-tab.active {
+      background: #3b82f6;
+      color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+    }
+    .encryption-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #f8fafc;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .form-control:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+    .password-hint {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      border: none;
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+    }
+    .btn-submit:hover {
+      opacity: 0.95;
+    }
+    .btn-submit:active {
+      transform: scale(0.99);
     }
   </style>
 </head>
 <body>
 
-<div class="login-card">
-  <div class="login-brand">
+<div class="auth-card">
+  <div class="auth-brand">
     <h2>HostelFlow</h2>
-    <p>Management Platform Authentication</p>
+    <p>University Hostel Platform Authentication</p>
   </div>
 
+  <div class="auth-tabs">
+    <div id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">Sign In</div>
+    <div id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">Create Account</div>
+  </div>
+
+  <!-- Sign In Form -->
   <form id="login-form">
     <div class="form-group">
-      <label class="form-label" for="username">Username</label>
-      <input type="text" id="username" class="form-control" placeholder="Enter username" required autocomplete="username">
+      <label class="form-label" for="login-username">Username</label>
+      <input type="text" id="login-username" class="form-control" placeholder="Enter username" required autocomplete="username">
     </div>
 
     <div class="form-group">
-      <label class="form-label" for="password">Password</label>
-      <input type="password" id="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+      <label class="form-label" for="login-password">Password</label>
+      <input type="password" id="login-password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
     </div>
 
-    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: var(--space-4); padding: 12px;">Sign In</button>
+    <button type="submit" class="btn-submit">Sign In</button>
+  </form>
+
+  <!-- Create Account Form -->
+  <form id="register-form" style="display: none;">
+    <div class="form-group">
+      <label class="form-label" for="reg-username">New Username</label>
+      <input type="text" id="reg-username" class="form-control" placeholder="Choose a username" required minlength="3" autocomplete="username">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="reg-password">New Password</label>
+      <input type="password" id="reg-password" class="form-control" placeholder="Choose a password" required minlength="8" autocomplete="new-password">
+      <div class="password-hint">Must be at least 8 characters with letters & numbers/symbols.</div>
+    </div>
+
+    <div class="encryption-notice">
+      🔒 <span><strong>Privacy Protection:</strong> Your password will be cryptographically hashed with a unique salt (Werkzeug/Scrypt) before being stored in the database.</span>
+    </div>
+
+    <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">Create Account & Encrypt</button>
   </form>
 </div>
 
 <script src="{{ url_for('static', filename='js/api.js') }}"></script>
 <script>
+  function switchAuthTab(mode) {
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const formLogin = document.getElementById('login-form');
+    const formRegister = document.getElementById('register-form');
+
+    if (mode === 'login') {
+      tabLogin.classList.add('active');
+      tabRegister.classList.remove('active');
+      formLogin.style.display = 'block';
+      formRegister.style.display = 'none';
+    } else {
+      tabRegister.classList.add('active');
+      tabLogin.classList.remove('active');
+      formRegister.style.display = 'block';
+      formLogin.style.display = 'none';
+    }
+  }
+
+  // Handle Login Submission
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
 
     try {
       const res = await ApiClient.post('/api/auth/login', { username, password });
@@ -79,6 +216,25 @@
       setTimeout(() => { window.location.href = '/dashboard'; }, 800);
     } catch (err) {
       ApiClient.showToast(err.message || 'Authentication failed.', 'error');
+    }
+  });
+
+  // Handle Create Account Submission
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value;
+
+    try {
+      const res = await ApiClient.post('/api/auth/register', { username, password });
+      ApiClient.showToast(res.message || 'Account created successfully with encrypted password! Please sign in.', 'success');
+      
+      // Auto-fill login form with new username and switch tab
+      document.getElementById('login-username').value = username;
+      document.getElementById('login-password').value = '';
+      setTimeout(() => { switchAuthTab('login'); }, 1200);
+    } catch (err) {
+      ApiClient.showToast(err.message || 'Account registration failed.', 'error');
     }
   });
 </script>

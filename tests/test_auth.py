@@ -1,5 +1,6 @@
 import pytest
 from app import create_app
+from app.utils.auth import hash_password, verify_password, validate_password_strength
 
 
 @pytest.fixture
@@ -45,3 +46,27 @@ def test_logout_endpoint(client):
     json_data = response.get_json()
     assert json_data['status'] == 'success'
     assert 'Logged out' in json_data['message']
+
+
+def test_register_weak_password_rejected(client):
+    """Tests POST /api/auth/register rejects weak password."""
+    response = client.post('/api/auth/register', json={
+        'username': 'test_user_new',
+        'password': '123'  # Too short
+    })
+    assert response.status_code == 400
+    json_data = response.get_json()
+    assert json_data['status'] == 'error'
+    assert 'at least 8 characters' in json_data['message']
+
+
+def test_password_hashing_encryption():
+    """Verifies plain text password is encrypted into a salted hash that cannot be read as plain text."""
+    plain_password = "MySecurePassword123!"
+    hashed = hash_password(plain_password)
+    
+    assert hashed != plain_password
+    assert plain_password not in hashed
+    assert hashed.startswith(('scrypt:', 'pbkdf2:'))
+    assert verify_password(plain_password, hashed) is True
+    assert verify_password("WrongPassword!", hashed) is False
